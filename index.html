@@ -3,123 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text to speech</title>
-    
-  <style>
-  *{
-    margin: 0;
-    padding: 0;
-font-family: 'poppins', sans-serif;
-box-sizing: border-box;
-
-}
-
-.word{
-   
-    width: 100%;
-    height: 100%;
-    min-height: 100vh;
-    background: linear-gradient(45deg, #eb8585,#6495ED);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    color: white;
-}
-.word h1{
-    font-weight: 500;
-    font-size: 45px;
-    margin-top: -50px;
-    margin-bottom: 50px;
-}
-.word h1 span{
-    color: rgb(242, 75, 128);
-    
-}
-textarea{
-    width: 500px;
-    height: 250px;
-    font-size: 15px;
-    color: rgb(0, 0, 0);
-    background: rgb(176, 196, 236);
-    border: 0;
-    outline: 0;
-    padding: 20px;
-    border-radius: 20px;
-    margin-bottom: 30px    ;
-   resize: both;
-}
-textarea::placeholder{
-    font-size: 16px;
-    color: black;
-}
-.wow{
-    display: flex;
-    width: 500px;
-    gap: 20px;
-    align-items: center;
-}
-button{
-    background: rgb(247, 137, 230);
-    color: #fff;
-    padding: 10px 30px;
-    border-radius: 25px;
-    outline: 0;
-    
-    font-size: medium;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-
-}
-button img{
-    width: 16px;
-    margin-right: 10px;
-}
-select{
-    flex: 1;
-    display: flex;
-    background:rgb(176, 196, 236);
-    color: #000000;
-    border: 0;
-    outline: 0;
-    padding: 20px;
-    height: 20px;
-    border-radius: 20px;
-
-}
-    
-  </style>
+    <title>Text to Speech</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+        .word {
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #eb8585, #6495ED);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+        .word h1 {
+            font-weight: 500;
+            font-size: 45px;
+            margin-top: -50px;
+            margin-bottom: 50px;
+        }
+        .word h1 span {
+            color: rgb(242, 75, 128);
+        }
+        textarea {
+            width: 500px;
+            height: 250px;
+            font-size: 15px;
+            color: rgb(0, 0, 0);
+            background: rgb(176, 196, 236);
+            border: 0;
+            outline: 0;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            resize: both;
+        }
+        textarea::placeholder {
+            font-size: 16px;
+            color: black;
+        }
+        .wow {
+            display: flex;
+            width: 500px;
+            gap: 20px;
+            align-items: center;
+        }
+        button {
+            background: rgb(247, 137, 230);
+            color: #fff;
+            padding: 10px 30px;
+            border-radius: 25px;
+            outline: 0;
+            font-size: medium;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        button img {
+            width: 16px;
+            margin-right: 10px;
+        }
+        select {
+            flex: 1;
+            background: rgb(176, 196, 236);
+            color: #000000;
+            border: 0;
+            outline: 0;
+            padding: 10px;
+            border-radius: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="word">
         <h1>Text-To-Speech <span>Converter</span></h1>
-        <textarea placeholder="write your text....."></textarea>
+        <textarea id="text" placeholder="Write your text..."></textarea>
         <div class="wow">
-            <select></select>
-           
-      <button> <img src="play.png">listen</button>
-
+            <select id="voiceSelect"></select>
+            <button id="speakButton">
+                <img src="play.png" alt="Play Icon">Listen
+            </button>
         </div>
-
     </div>    
-   <script>
-     let speech = new SpeechSynthesisUtterance();
+    <script>
+        let speech = new SpeechSynthesisUtterance();
+        let voices = [];
 
-let voiceSelect = document.querySelector("select");
-window.speechSynthesis.onvoiceschanged = () => {
-    voice = window.speechSynthesis.getVoices();
-    speech.voice = voices[0];
+        // Populate voice options
+        function populateVoices() {
+            voices = window.speechSynthesis.getVoices();
+            let voiceSelect = document.getElementById("voiceSelect");
+            voiceSelect.innerHTML = ''; // Clear existing options
+            voices.forEach((voice, index) => {
+                let option = document.createElement("option");
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+            speech.voice = voices[0]; // Set default voice
+        }
 
-    voices.forEach((voice, i) => (voiceSelect.options[i] = new Option(voice. 
-        name, i)));
-        };
+        window.speechSynthesis.onvoiceschanged = populateVoices;
 
-        voiceSelect.addEventListener("change", () => {
-            speech.voice = voices[voiceSelect.value];
+        document.getElementById("voiceSelect").addEventListener("change", () => {
+            speech.voice = voices[document.getElementById("voiceSelect").value];
         });
 
-
-   </script>
+        document.getElementById("speakButton").addEventListener("click", () => {
+            let text = document.getElementById("text").value;
+            if (text.trim() !== '') {
+                speech.text = text;
+                window.speechSynthesis.speak(speech);
+            } else {
+                alert("Please enter some text.");
+            }
+        });
+    </script>
 </body>
 </html>
